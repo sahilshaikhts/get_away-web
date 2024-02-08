@@ -1,0 +1,258 @@
+@font-face {
+    font-family: Poppins-Regular;
+    src: url('../../Assets/Fonts/Poppins/Poppins-Regular.ttf');
+}
+
+@font-face {
+    font-family: Poppins-ExtraLight;
+    src: url('../../Assets/Fonts/Poppins/Poppins-ExtraLight.ttf');
+}
+
+@font-face {
+    font-family: Poppins-Bold;
+    src: url('../../Assets/Fonts/Poppins/Poppins-Bold.ttf');
+}
+
+@font-face {
+    font-family: Rajdhani-Regular;
+    src: url('../../Assets/Fonts/Rajdhani/Rajdhani-Regular.ttf');
+}
+
+@font-face {
+    font-family: Rajdhani-ExtraLight;
+    src: url('../../Assets/Fonts/Rajdhani/Rajdhani-Light.ttf');
+}
+
+@font-face {
+    font-family: Rajdhani-Bold;
+    src: url('../../Assets/Fonts/Rajdhani/Rajdhani-Bold.ttf');
+}
+
+
+:root {
+    --font-primary: Poppins-Bold;
+    --font-primary-light: Poppins-Regular;
+
+    --font-secondary: Rajdhani-Bold;
+    --font-secondary-light: Rajdhani-Regular;
+
+    --text-color-dark: #131212;
+    --text-color-light: rgb(233, 230, 222);
+    --background-color: rgb(189, 183, 178);
+    --background-color-darker: rgb(201, 202, 197);
+
+    --color-button-light: #e4f3e5;
+    --color-button-dark: #161514;
+}
+
+* {
+
+    font-family: var(--font-secondary);
+    box-sizing: border-box;
+    color: var(--text-color-light);
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    margin-bottom: .5em;
+}
+
+h2 {
+    font-family: var(--font-secondary);
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-family: var(--font-secondary);
+    font-size: 1.25rem;
+}
+
+p {
+    font-family: var(--font-primary-light);
+    font-size: 1rem;
+}
+
+.smaller-p {
+    font-size: .7em;
+}
+
+/*Page layout setup*/
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-color);
+}
+
+header {
+    display: flex;
+    position: fixed;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+    background-color: rgb(202, 172, 132);
+    z-index: 1;
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    margin-right: .5em;
+}
+
+.nav-list a {
+    font-size: 1rem;
+    color: var(--text-color-dark);
+    text-decoration: none;
+}
+
+.nav-lItem {
+    padding: .5em;
+}
+
+.nav-logo {
+    width: auto;
+    height: 80%;
+    margin-left: 2em;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 2rem;
+    background-color: #262926;
+
+}
+
+footer ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    align-items: center;
+    justify-content: center;
+}
+
+footer li a {
+    font-size: .75rem;
+    font-family: Rajdhani-ExtraLight;
+}
+
+footer li a:hover {
+    color: #9e543d;
+}
+
+footer p {
+    font-size: .7rem;
+    max-width: 10rem;
+    font-family: Rajdhani-ExtraLight;
+    text-align: center;
+
+}
+
+/* Page section */
+
+.page-section {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    width: 80%;
+    height: 100%;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.row {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 2rem 0;
+}
+
+#game_screen{
+    border: 1px black solid;
+}
+
+@media screen and (min-width: 810px) {
+    html {
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 3rem;
+    }
+
+
+    /* Page section */
+
+    .col {
+        flex-direction: row;
+        height: 100%;
+    }
+
+    .row {
+        margin: 1em 0;
+        height: 100%;
+    }
+
+    .row-30 {
+        width: 30%;
+    }
+
+    .row-33 {
+        width: 33%;
+    }
+
+    .row-40 {
+        width: 40%;
+    }
+
+    .row-50 {
+        width: 50%;
+    }
+
+    .row-70 {
+        width: 70%;
+    }
+
+    .row-100 {
+        width: 100%;
+    }
+
+}
+
+@media screen and (min-width: 1800px) {
+    html {
+        font-size: 18px;
+    }
+
+
+}
