@@ -10,10 +10,15 @@ export function Game(canvas) {
     };
     this.gameObjects = [];
     /**
-     * @param aGameObjectsWithGridCoord Array of objects with gameObject and its grid position. ({gameObject,gridPos:{gridX,gridY}})
+     * @param aGameObjectsWithGridCoord Array of objects with gameObject and its grid position. ({gameObject,gridPos:{x,y}})
      * @param grid Pass a initialized grid with size and cell size set.
      */
     this.SetupScene = (aGameObjectsWithGridCoord, grid) => {
+
+        if (grid == undefined) {
+            console.log("Grid is undefined");
+            return null;
+        }
         this.grid = grid;
         aGameObjectsWithGridCoord.forEach(obj => {
             if (obj.gameObject) {
@@ -25,6 +30,8 @@ export function Game(canvas) {
         });
     }
     this.Begin = () => {
+        console.log(this.gameObjects)
+
         if (this.draw_context !== null)
             RunGame();
         else
