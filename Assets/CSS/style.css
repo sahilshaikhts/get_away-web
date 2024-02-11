@@ -1,6 +1,6 @@
 @font-face {
-    font-family: Poppins-Regular;
-    src: url('../../Assets/Fonts/Poppins/Poppins-Regular.ttf');
+    font-family: JMH-EXTRA;
+    src: url('../../Assets/Fonts/JMH EXTRA.ttf');
 }
 
 @font-face {
@@ -30,15 +30,14 @@
 
 
 :root {
-    --font-primary: Poppins-Bold;
-    --font-primary-light: Poppins-Regular;
+    --font-primary: JMH-EXTRA;
 
     --font-secondary: Rajdhani-Bold;
     --font-secondary-light: Rajdhani-Regular;
 
     --text-color-dark: #131212;
     --text-color-light: rgb(233, 230, 222);
-    --background-color: rgb(189, 183, 178);
+    --background-color: rgb(24, 26, 23);
     --background-color-darker: rgb(201, 202, 197);
 
     --color-button-light: #e4f3e5;
@@ -194,22 +193,127 @@ footer p {
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin: 2rem 0;
 }
 
-#game_screen{
-    border: 1px black solid;
+#menu.row {
+    height: 100%;
+}
+
+.main-menu {
+    display: flex;
+    width: 100%;
+    aspect-ratio: 16/9;
+    flex-direction: column;
+    align-items: center;
+    background-color: #95a478;
+}
+
+.menu_section {
+    display: flex;
+    flex-direction: column;
+    height: 33%;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-menu h1 {
+    font-weight: 300;
+    color: #191d19;
+    user-select: none;
+}
+
+.btn_play {
+    width: 50px;
+    height: 50px;
+    user-select: none;
+    background-image: url("../Images/play-button.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    cursor: pointer;
+
+}
+
+.btn_play:hover {
+    background-image: url("../Images/play-button_green.png");
+}
+
+.btn_help_container {
+    display: flex;
+    width: 100%;
+    justify-content: end;
+    align-items: end;
+    user-select: none;
+}
+
+.button_help {
+    font-family: var(--font-secondary);
+    font-size: 3rem;
+    color: #191d19;
+    margin: 0 2rem;
+    cursor: pointer;
+
+}
+
+.button_help:hover {
+    color: #bed452;
+
+}
+
+.game_page {
+    display: flex;
+    justify-content: space-between;
+}
+
+.game_screen {
+    display: flex;
+    justify-content: center;
+
+    width: 70%;
+    height: 90%;
+    aspect-ratio: 16/9;
+}
+.game_screen canvas
+{
+
+}
+.game_screen_ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    background-color: #bed452;
+}
+.game_screen_ui img
+{
+    width: 6rem;
+    align-items: center;
+    opacity: 85%;
+    cursor: pointer;
+}
+.game_screen_ui img:hover
+{
+    opacity: 60%;
+}
+.game_screen_ui h2 {
+    margin-top: .5rem;
+    font-size: 3rem;
+    font-family: var(--font-primary);
+    font-weight: 300;
+    color: #25271b;
+    margin-right: 2rem;
 }
 
 @media screen and (min-width: 810px) {
+
     html {
         font-size: 12px;
     }
 
     h1 {
-        font-size: 3rem;
+        font-size: 7rem;
+        font-weight: 300;
     }
-
 
     /* Page section */
 
@@ -219,7 +323,6 @@ footer p {
     }
 
     .row {
-        margin: 1em 0;
         height: 100%;
     }
 
@@ -247,6 +350,14 @@ footer p {
         width: 100%;
     }
 
+    .btn_play {
+        width: 120px;
+        height: 120px;
+    }
+
+    .button_help {
+        font-size: 8rem;
+    }
 }
 
 @media screen and (min-width: 1800px) {

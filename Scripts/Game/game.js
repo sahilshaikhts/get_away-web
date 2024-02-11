@@ -2,7 +2,7 @@ import { Grid, GridToWorldPosition } from "./grid.js";
 import { Square } from "./square.js";
 
 //Game function-constructor/class
-export function Game(canvas) {
+export function Game(canvas,bg_color) {
     this.canvas = canvas;
     this.draw_context = this.canvas.getContext("2d");
     this.mouse = {
@@ -42,11 +42,17 @@ export function Game(canvas) {
     const RunGame = () => {
         this.draw_context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         Update();
+        DrawBackground();
         Render();
         requestAnimationFrame(RunGame);
     }
-
+    const DrawBackground=()=>
+    {
+        this.draw_context.fillStyle=bg_color;
+        this.draw_context.fillRect(0,0,canvas.width,canvas.height)
+    }
     const Render = () => {
+       
         this.gameObjects.forEach(gameObject => {
             gameObject.Draw(this.draw_context);
         });
