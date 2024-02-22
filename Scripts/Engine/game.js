@@ -1,8 +1,8 @@
-import { Grid, GridToWorldPosition } from "./grid.js";
-import { Square } from "./square.js";
-
+import { GridToWorldPosition } from "../Game/grid.js";
+import { Transform } from "./ECS/Systems/Transform.js";
 //Game function-constructor/class
 export function Game(canvas, bg_color) {
+  this.systems = [new Transform()];
   this.canvas = canvas;
   this.draw_context = this.canvas.getContext("2d");
   this.mouse = {
@@ -35,34 +35,66 @@ export function Game(canvas, bg_color) {
     });
   };
   this.Begin = () => {
-    if (this.draw_context !== null) RunGame();
+    this.lastFrameTimeStamp = 0;
+    if (this.draw_context !== null) RunGame(0);
     else
       console.error("Canvas's 2D draw context was null, can't run the game !");
   };
 
   //Game's Loop
-  const RunGame = () => {
+  const RunGame = (timeStamp) => {
+    const deltaTime = (timeStamp - this.lastFrameTimeStamp) / 1000;
+    this.lastFrameTimeStamp = timeStamp;
     this.draw_context.clearRect(0, 0, canvas.width, canvas.height);
-    Update();
+
+    Update(deltaTime);
     DrawBackground();
     Render();
     requestAnimationFrame(RunGame);
   };
+
   const DrawBackground = () => {
     this.draw_context.fillStyle = bg_color;
     this.draw_context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   };
   const Render = () => {
-    this.gameObjects.forEach((gameObject) => {
-      gameObject.Draw(this.draw_context);
-    });
+    if (this.gameObjects) {
+      this.gameObjects.forEach((gameObject) => {
+        gameObject.Draw(this.draw_context);
+      });
+    }
   };
-  const Update = () => {
-    this.gameObjects.forEach((gameObject) => {
-      gameObject.Update();
-    });
+  const Update = (deltaTime) => {
+    if (this.systems) {
+      this.systems.forEach((system) => {
+        system.Update(deltaTime);
+      });
+    }
   };
 
+  /**
+   *
+   * @param {*} systemClass Reference to the system-class that the component belongs to.
+   * @param {*} entityID ID of an existing entity.
+   */
+  this.AddComponentToEntity = function (systemClass, entityID) {
+    const system = this.systems.find((sys) => sys instanceof systemClass);
+    if (system) {
+      return system.RegisterEntity(entityID);
+    } else {
+      console.warn(
+        "Error: No system of given class exists,make sure to register your system to game."
+      );
+    }
+  };
+  this.GetEntitysComponent(systemClass, entityID);
+  {
+    const system = this.systems.find((sys) => sys instanceof systemClass);
+
+    if (system) {
+      return system.GetEntity(entityID);
+    }
+  }
   //Todo: remove from here and put it in some sort of input handler or controller, and make it retrive gameObject thru grid location from Game class.
   this.canvas.addEventListener("mousedown", (event) => {
     const canvasBounds = this.canvas.getBoundingClientRect();
