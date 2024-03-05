@@ -13,7 +13,7 @@ export function Transform() {
       );
     } else {
       const newComponent = new TransformComponent(id);
-      this.components[id];
+      this.components[id] = newComponent;
       return newComponent;
     }
   };
@@ -23,5 +23,8 @@ export function Transform() {
     }
   };
 
-  this.Update = function (deltaTime) {};
+  this.Update = function (deltaTime) {
+    for (let component in this.components) {
+    }
+  };
 }

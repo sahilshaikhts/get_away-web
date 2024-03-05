@@ -1,8 +1,9 @@
 import { GridToWorldPosition } from "../Game/grid.js";
+import { Physics } from "./ECS/Systems/Physics.js";
 import { Transform } from "./ECS/Systems/Transform.js";
 //Game function-constructor/class
 export function Game(canvas, bg_color) {
-  this.systems = [new Transform()];
+  this.systems = [new Transform(), new Physics(this)];
   this.canvas = canvas;
   this.draw_context = this.canvas.getContext("2d");
   this.mouse = {
@@ -28,7 +29,7 @@ export function Game(canvas, bg_color) {
           obj.gridPos.x,
           obj.gridPos.y
         );
-        obj.gameObject.SetPosition(worldPos.x, worldPos.y);
+        // obj.gameObject.SetPosition(worldPos.x, worldPos.y);
 
         this.gameObjects.push(obj.gameObject);
       }
@@ -87,14 +88,12 @@ export function Game(canvas, bg_color) {
       );
     }
   };
-  this.GetEntitysComponent(systemClass, entityID);
-  {
+  this.GetEntitysComponent = function (systemClass, entityID) {
     const system = this.systems.find((sys) => sys instanceof systemClass);
-
     if (system) {
-      return system.GetEntity(entityID);
+      return system.GetEntitysComponent(entityID);
     }
-  }
+  };
   //Todo: remove from here and put it in some sort of input handler or controller, and make it retrive gameObject thru grid location from Game class.
   this.canvas.addEventListener("mousedown", (event) => {
     const canvasBounds = this.canvas.getBoundingClientRect();
@@ -120,7 +119,7 @@ export function Game(canvas, bg_color) {
   const CheckIfRayHitObject = () => {
     this.gameObjects.forEach((gameObject) => {
       if (gameObject.CheckRayHit(this.mouse.x, this.mouse.y)) {
-        gameObject.m_color = "black";
+        gameObject.color = "black";
         this.clickedObject = gameObject;
         return this.clickedObject;
       }

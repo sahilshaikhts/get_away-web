@@ -1,7 +1,7 @@
 //ECS_system function-constructor/class
 export function ECS_system() {
   //Object map with components and there associated enitity's UID as the key.
-  this.components = [];
+  this.components = {};
 
   //This function needs to be overwritten by the child class.
   this.RegisterEntity = function (id) {
@@ -12,8 +12,7 @@ export function ECS_system() {
     throw new Error("Missing implementation.");
   };
 
-  this.GetEntity(entityID);
-  {
+  this.GetEntitysComponent = function (entityID) {
     if (this.components) {
       //Check if entity with the id exists in the list.
       if (this.components.hasOwnProperty(entityID)) {
@@ -22,6 +21,6 @@ export function ECS_system() {
         return undefined; //if not return undefined
       }
     }
-  }
+  };
   this.Update = function (deltaTime) {};
 }
