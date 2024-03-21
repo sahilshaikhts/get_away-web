@@ -1,30 +1,32 @@
 "use strict";
 
 import { Physics } from "./Engine/ECS/Systems/Physics.js";
+import { Sprite } from "./Engine/ECS/Systems/Sprite.js";
 import { Transform } from "./Engine/ECS/Systems/Transform.js";
+import { ECS_entity } from "./Engine/ECS/src/entity.js";
 import { Game } from "./Engine/game.js";
-import { Grid } from "./Game/grid.js";
-import { Square } from "./Game/square.js";
 
 window.addEventListener("load", (event) => {
   const canvas = document.getElementById("game_canvas");
   if (canvas !== null) {
     const game = new Game(canvas, "#2b2b26");
-    const grid = new Grid(0, 0, 10, 5, 100);
 
     //Level layout
-    const square_red = new Square(game, 100, "#eb3b43");
-    const square_green = new Square(game, 100, "#acc795");
+    const square_red = new ECS_entity(game);
 
     game.AddComponentToEntity(Transform, square_red.GetID());
     game.AddComponentToEntity(Physics, square_red.GetID());
 
-    const levelLayout = [
-      { gameObject: square_red, gridPos: { x: 0, y: 1 } },
-      { gameObject: square_green, gridPos: { x: 7, y: 0 } },
+    const sprite = game.AddComponentToEntity(Sprite, square_red.GetID());
+    sprite.shape = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 100 },
+      { x: 0, y: 100 },
     ];
 
-    game.SetupScene(levelLayout, grid);
+    sprite.color = "#eb3b43";
+
     game.Begin();
   }
 

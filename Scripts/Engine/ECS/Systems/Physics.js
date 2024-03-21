@@ -1,4 +1,4 @@
-//ECS_entity function-constructor/class
+//Physics function-constructor/class
 import { ECS_system } from "../src/system.js";
 import { PhysicsComponent } from "./Components/physics-component.js";
 import { Transform } from "./Transform.js";

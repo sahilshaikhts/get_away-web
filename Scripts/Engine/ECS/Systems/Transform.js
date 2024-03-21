@@ -23,8 +23,5 @@ export function Transform() {
     }
   };
 
-  this.Update = function (deltaTime) {
-    for (let component in this.components) {
-    }
-  };
+  this.Update = function (deltaTime) {};
 }

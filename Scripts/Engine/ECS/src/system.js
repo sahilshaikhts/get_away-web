@@ -4,9 +4,7 @@ export function ECS_system() {
   this.components = {};
 
   //This function needs to be overwritten by the child class.
-  this.RegisterEntity = function (id) {
-    throw new Error("Missing implementation.");
-  };
+  this.RegisterEntity = function (id) {};
   //This function needs to be overwritten by the child class.
   this.DeregisterEntity = function (id) {
     throw new Error("Missing implementation.");
