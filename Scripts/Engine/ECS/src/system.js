@@ -4,7 +4,9 @@ export function ECS_system() {
   this.components = {};
 
   //This function needs to be overwritten by the child class.
-  this.RegisterEntity = function (id) {};
+  this.RegisterEntity = function (id) {
+    throw new Error("Missing implementation.");
+  };
   //This function needs to be overwritten by the child class.
   this.DeregisterEntity = function (id) {
     throw new Error("Missing implementation.");
@@ -18,6 +20,11 @@ export function ECS_system() {
       } else {
         return undefined; //if not return undefined
       }
+    }
+  };
+  this.GetAllComponents = function () {
+    if (this.components) {
+      return this.components;
     }
   };
   this.Update = function (deltaTime) {};

@@ -1,10 +1,16 @@
 import { Physics } from "./ECS/Systems/Physics.js";
 import { Sprite } from "./ECS/Systems/Sprite.js";
 import { Transform } from "./ECS/Systems/Transform.js";
+import { ECS_component } from "./ECS/src/component.js";
 import { ECS_system } from "./ECS/src/system.js";
+import QuadTree from "./Utility/QuadTree.js";
 
 //Game function-constructor/class
 export function Game(canvas, bg_color) {
+  //Temporary
+  const quadTree = new QuadTree(0, 0, canvas.width, canvas.height);
+  //End
+
   const m_canvas = canvas;
   if (m_canvas == undefined) {
     throw new Error(
@@ -29,6 +35,7 @@ export function Game(canvas, bg_color) {
   //Initlizing function
   this.Begin = () => {
     this.lastFrameTimeStamp = 0;
+    SetUpQuadTree();
     RunGame(0);
   };
 
@@ -44,6 +51,22 @@ export function Game(canvas, bg_color) {
     requestAnimationFrame(RunGame);
   };
 
+  canvas.addEventListener("mousemove", (event) => {
+    const canvasBounds = canvas.getBoundingClientRect();
+
+    //get the scale of the canvas element
+    const scaleX = canvas.width / canvasBounds.width;
+    const scaleY = canvas.height / canvasBounds.height;
+
+    //Adjust the mouse position according to the scale
+    const mouseX = event.offsetX * scaleX;
+    const mouseY = event.offsetY * scaleY;
+
+    if (quadTree) {
+      let found = quadTree.GetEntitiesWithinRange(mouseX, mouseY, 200, 200);
+    }
+  });
+
   const DrawBackground = () => {
     m_draw_context.fillStyle = bg_color;
     m_draw_context.fillRect(0, 0, m_canvas.width, m_canvas.height);
@@ -55,12 +78,21 @@ export function Game(canvas, bg_color) {
         system.Update(deltaTime);
       });
     }
+    quadTree.Draw(m_draw_context);
+  };
+
+  const SetUpQuadTree = function () {
+    const transformComponents = m_systems[0].GetAllComponents();
+    for (let key in transformComponents) {
+      quadTree.InsertEntity(transformComponents[key]);
+    }
   };
 
   /**
    *
    * @param {ECS_system} systemClass Reference to the system-class that the component belongs to.
    * @param {Number} entityID ID of an existing entity.
+   * @returns {ECS_component} Returns newly created component
    */
   this.AddComponentToEntity = function (systemClass, entityID) {
     const system = m_systems.find((sys) => sys instanceof systemClass);

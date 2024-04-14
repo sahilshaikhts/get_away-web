@@ -1,5 +1,6 @@
-export default function InputManager(canvas) {
+export default function InputManager(game, canvas) {
   const m_canvas = canvas;
+  const m_game = game;
 
   if (m_canvas == undefined) {
     throw new Error("Missing canvas reference in input manager!");
@@ -23,6 +24,18 @@ export default function InputManager(canvas) {
 
     this.mouse_position = { x: mouseX, y: mouseY };
   });
+
+  //Get Object under mouse
+  this.GetObjectUnderMouse = function () {
+    if (
+      this.mouse_position.x > this.position.x &&
+      this.mouse_position.x < this.position.x + this.size &&
+      this.mouse_position.y > this.position.y &&
+      this.mouse_position.y < this.position.y + this.size
+    )
+      return true;
+    else return false;
+  };
 
   /**
    *

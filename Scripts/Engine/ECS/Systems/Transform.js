@@ -12,7 +12,10 @@ export function Transform() {
         "Entity associated with this id already has the transform component or the id is duplicate!"
       );
     } else {
-      const newComponent = new TransformComponent(id);
+      const newComponent = new TransformComponent(id, {
+        x: Math.random() * 900,
+        y: Math.random() * 700,
+      });
       this.components[id] = newComponent;
       return newComponent;
     }
