@@ -112,13 +112,22 @@ function Quad(x, y, w, h, limit) {
    * @param {number} h heigth of the area to check
    */
   this.Query = function (foundObjects, rectX, rectY, w, h) {
+    //Check if the quad area intersects with the check area.
     if (CheckIntersection(rectX, rectY, w, h)) {
       for (let i = 0; i < m_objects.length; i++) {
+        //  *****Note******: Here is the problem: Checking origin withing the area to check and not all  four corners of the sprite
+        // m_objects[i].position.x < rectX + w ||
+        // m_objects[i].position.x + m_objects[i].scale.x > rectX ||
+        // m_objects[i].position.y < rectY + h ||
+        // m_objects[i].position.y + m_objects[i].scale.y > rectY
+        console.log(m_objects[i].scale.y);
         if (
-          m_objects[i].position.x > rectX &&
-          m_objects[i].position.x < rectX + w &&
-          m_objects[i].position.y > rectY &&
-          m_objects[i].position.y < rectY + h
+          !(
+            m_objects[i].position.x > rectX + w ||
+            m_objects[i].position.x + m_objects[i].scale.x < rectX ||
+            m_objects[i].position.y > rectY + h ||
+            m_objects[i].position.y + m_objects[i].scale.y < rectY
+          )
         ) {
           foundObjects.push(m_objects[i]);
         }

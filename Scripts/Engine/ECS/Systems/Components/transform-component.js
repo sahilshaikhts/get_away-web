@@ -15,7 +15,13 @@ export function TransformComponent(ownerEntity, position, rotation, scale) {
   if (ownerEntity == undefined) {
     throw new Error("Missing reference to ownerEntity!");
   }
-
+  /**
+   *
+   * @param {*} aX Width
+   * @param {*} aY Height
+   * @returns
+   */
+  this.SetScale = (aX, aY) => (this.scale = { x: aX, y: aY });
   //Set initial values if provided or set it to default.
   this.position = position ? position : { x: 0, y: 0 };
   this.rotation = rotation ? rotation : { x: 0, y: 0 };

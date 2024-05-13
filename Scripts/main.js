@@ -22,8 +22,8 @@ window.addEventListener("load", (event) => {
     //Level layout
     for (let i = 0; i < 15; i++) {
       squares.push(new ECS_entity(game));
-      game.AddComponentToEntity(Transform, squares[i].GetID());
-
+      let transform = game.AddComponentToEntity(Transform, squares[i].GetID());
+      transform.SetScale(50, 50);
       game.AddComponentToEntity(Physics, squares[i].GetID());
 
       let sprite = game.AddComponentToEntity(Sprite, squares[i].GetID());
