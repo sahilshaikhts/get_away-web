@@ -46,7 +46,7 @@ export default function QuadTree(x, y, w, h, limit = 4) {
       context.beginPath();
       context.lineWidth = "1";
       context.strokeStyle = "red";
-      context.rect(this.rect.x, this.rect.y, 200, 200);
+      context.rect(this.rect.x, this.rect.y, 5, 5);
       context.stroke();
     }
     if (this.foundObjects)
@@ -83,7 +83,19 @@ function Quad(x, y, w, h, limit) {
   this.Insert = function (transform) {
     //Add new object if not excceding limit,otherwise add it to a child-quad.
     if (m_objects.length < m_limit) {
-      if (CheckIfPointInside(transform.position)) {
+      //If the shape intersect with the quad add it.
+      if (
+        CheckIntersection(
+          transform.position.x,
+          transform.position.y,
+          transform.scale.x,
+          transform.scale.y,
+          m_position.x,
+          m_position.y,
+          m_size.x,
+          m_size.y
+        )
+      ) {
         m_objects.push(transform);
         return true;
       }
@@ -93,13 +105,16 @@ function Quad(x, y, w, h, limit) {
         //If sub quads were created then try inserting entity intop a sub-quad
         CreateSubQuad();
       }
+
+      let success = false;
       //Loop through each child quad and try insert
       for (let i = 0; i < m_childQuads.length; i++) {
-        if (m_childQuads[i].Insert(transform)) return true;
+        if (m_childQuads[i].Insert(transform)) {
+          success = true; //Set to true if inserted in any sub quad
+        }
       }
 
-      //If none of the quad inserts the object return false (because it was out of bounds).
-      return false;
+      return success;
     }
   };
 
@@ -113,20 +128,29 @@ function Quad(x, y, w, h, limit) {
    */
   this.Query = function (foundObjects, rectX, rectY, w, h) {
     //Check if the quad area intersects with the check area.
-    if (CheckIntersection(rectX, rectY, w, h)) {
+    if (
+      CheckIntersection(
+        rectX,
+        rectY,
+        w,
+        h,
+        m_position.x,
+        m_position.y,
+        m_size.x,
+        m_size.y
+      )
+    ) {
       for (let i = 0; i < m_objects.length; i++) {
-        //  *****Note******: Here is the problem: Checking origin withing the area to check and not all  four corners of the sprite
-        // m_objects[i].position.x < rectX + w ||
-        // m_objects[i].position.x + m_objects[i].scale.x > rectX ||
-        // m_objects[i].position.y < rectY + h ||
-        // m_objects[i].position.y + m_objects[i].scale.y > rectY
-        console.log(m_objects[i].scale.y);
         if (
-          !(
-            m_objects[i].position.x > rectX + w ||
-            m_objects[i].position.x + m_objects[i].scale.x < rectX ||
-            m_objects[i].position.y > rectY + h ||
-            m_objects[i].position.y + m_objects[i].scale.y < rectY
+          CheckIntersection(
+            rectX,
+            rectY,
+            w,
+            h,
+            m_objects[i].position.x,
+            m_objects[i].position.y,
+            m_objects[i].scale.x,
+            m_objects[i].scale.y
           )
         ) {
           foundObjects.push(m_objects[i]);
@@ -156,7 +180,22 @@ function Quad(x, y, w, h, limit) {
    * @param {number} w width of the area to check
    * @param {number} h heigth of the area to check
    */
-  function CheckIntersection(rectX, rectY, w, h) {
+  function CheckIntersection(
+    rectA_X,
+    rectA_Y,
+    rectA_W,
+    rectA_H,
+    rectB_X,
+    rectB_Y,
+    rectB_W,
+    rectB_H
+  ) {
+    return !(
+      rectA_X > rectB_X + rectB_W ||
+      rectA_X + rectA_W < rectB_X ||
+      rectA_Y > rectB_Y + rectB_H ||
+      rectA_Y + rectA_H < rectB_Y
+    );
     return (
       CheckIfPointInside({ x: rectX, y: rectY }) ||
       CheckIfPointInside({ x: rectX, y: rectY + h }) ||

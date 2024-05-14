@@ -63,7 +63,12 @@ export function Game(canvas, bg_color) {
     const mouseY = event.offsetY * scaleY;
 
     if (quadTree) {
-      let found = quadTree.GetEntitiesWithinRange(mouseX, mouseY, 200, 200);
+      let found = quadTree.GetEntitiesWithinRange(
+        mouseX - 2.5,
+        mouseY - 2.5,
+        5,
+        5
+      );
     }
   });
 
