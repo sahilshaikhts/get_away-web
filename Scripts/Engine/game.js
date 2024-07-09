@@ -3,7 +3,7 @@ import { Sprite } from "./ECS/Systems/Sprite.js";
 import { Transform } from "./ECS/Systems/Transform.js";
 import { ECS_component } from "./ECS/src/component.js";
 import { ECS_system } from "./ECS/src/system.js";
-import QuadTree from "./Utility/QuadTree.js";
+import QuadTree, { QEntity } from "./Utility/QuadTree.js";
 
 //Game function-constructor/class
 export function Game(canvas, bg_color) {
@@ -89,7 +89,15 @@ export function Game(canvas, bg_color) {
   const SetUpQuadTree = function () {
     const transformComponents = m_systems[0].GetAllComponents();
     for (let key in transformComponents) {
-      quadTree.InsertEntity(transformComponents[key]);
+      quadTree.InsertEntity(
+        new QEntity(
+          transformComponents[key].GetID(),
+          transformComponents[key].position.x,
+          transformComponents[key].position.y,
+          transformComponents[key].scale.x,
+          transformComponents[key].scale.y
+        )
+      );
     }
   };
 

@@ -1,5 +1,3 @@
-import { TransformComponent } from "../ECS/Systems/Components/transform-component.js";
-
 /**
  * @param {number} x X coordinate of QuadTree
  * @param {number} y Y coordinate of QuadTree
@@ -8,24 +6,49 @@ import { TransformComponent } from "../ECS/Systems/Components/transform-componen
  * @param {number} limit Max number of units per quad (defualt 4)
  */
 export default function QuadTree(x, y, w, h, limit = 4) {
+  //temp
+  this.rect;
+  this.foundObjects;
+
   //Private
   const m_root = new Quad(x, y, w, h, limit);
+  //Associative array of array, index(quad) stores array of transforms?might need to change it
+  const m_entities = new Map();
 
   //Public
-
   /**
-   * @param {TransformComponent} transform Transform component of the entity
+   * @param {QEntity} aEntity
    */
-  this.InsertEntity = function (transform) {
+  this.InsertEntity = function (aEntity) {
     if (m_root) {
-      m_root.Insert(transform);
+      //Array to store the quads that the entity was inserted in.
+      const arr_quads = [];
+      const entityID = aEntity.GetID();
+
+      //If inserted sucessfully add it to the m_entities
+      if (m_root.Insert(aEntity, arr_quads)) {
+        //If entity already in the map
+        if (m_entities.has(entityID)) {
+          const quads = m_entities.get(entityID);
+
+          m_entities.set(entityID, [...quads, arr_quads]);
+        } else {
+          m_entities.set(entityID, arr_quads);
+        }
+      }
     } else {
       throw new Error("Fatal: Missing root quad!");
     }
   };
-  //temp
-  this.rect;
-  this.foundObjects;
+  this.MigrateEntity = function (aEntityID) {
+    if (m_entities.has(aEntityID)) {
+      const quads = m_entities.get(aEntityID);
+      for (i = 0; i < quads.length; i++) {
+        quads.RemoveEntity(aEntityID);
+      }
+      m_entities.delete(aEntityID);
+    }
+  };
   /**
    * @param {number} rectX x-coordiante of the area(rectangle) to check
    * @param {number} rectY y-coordiante of the area to check
@@ -63,40 +86,62 @@ export default function QuadTree(x, y, w, h, limit = 4) {
     m_root.Draw(context);
   };
 }
+/**
+ *
+ * @param {*} aUID Object/Component's unique ID.
+ * @param {*} aX Position in X-coordinate
+ * @param {*} aY Position in Y-coordinate
+ * @param {*} aW Width
+ * @param {*} aH Height
+ */
+export function QEntity(aUID, aX, aY, aW, aH) {
+  this.position = { x: aX ? aX : 0, y: aY ? aY : 0 };
+  this.scale = { x: aW ? aW : 1, y: aH ? aH : 1 };
+  this.GetID = () => aUID;
+}
 
+/**
+ * Quad is class representing a branch in the quad tree.
+ * @param {*} x Center origin x coordinate
+ * @param {*} y Center origin y coordinate
+ * @param {*} w Width
+ * @param {*} h Height
+ * @param {*} limit Max number of entities before it creates sub-branches.
+ */
 function Quad(x, y, w, h, limit) {
   //Private
   const m_position = { x: x, y: y };
   const m_size = { x: w, y: h };
   const m_limit = limit;
 
-  //m_objects is the list of transforms associated with different entities
-  const m_objects = [];
-
+  //m_entities is the list of QEntity associated with different entities
+  const m_entities = new Map();
   const m_childQuads = [];
 
   //Public
   //Note: Edge case to improve later: When subdivided the parents objects still remains scattered and often in a subquad and visibly looks it exceeds the limit(in sub-quad) ,redistribute the objects for more accurate and optimized version.
   /**
-   * @param {TransformComponent} transform Transform component of the entity
+   * @param {QEntity} aEntity Object of QEntity(QuadEntity) class
+   * @param {Array} aArrQuads Array to store quads that the entity was stored in.
    */
-  this.Insert = function (transform) {
+  this.Insert = function (aEntity, aArrQuads) {
     //Add new object if not excceding limit,otherwise add it to a child-quad.
-    if (m_objects.length < m_limit) {
+    if (m_entities.size < m_limit) {
       //If the shape intersect with the quad add it.
       if (
         CheckIntersection(
-          transform.position.x,
-          transform.position.y,
-          transform.scale.x,
-          transform.scale.y,
+          aEntity.position.x,
+          aEntity.position.y,
+          aEntity.scale.x,
+          aEntity.scale.y,
           m_position.x,
           m_position.y,
           m_size.x,
           m_size.y
         )
       ) {
-        m_objects.push(transform);
+        m_entities.set(aEntity.GetID(), aEntity);
+        aArrQuads.push(this);
         return true;
       }
     } else {
@@ -109,7 +154,7 @@ function Quad(x, y, w, h, limit) {
       let success = false;
       //Loop through each child quad and try insert
       for (let i = 0; i < m_childQuads.length; i++) {
-        if (m_childQuads[i].Insert(transform)) {
+        if (m_childQuads[i].Insert(aEntity, aArrQuads)) {
           success = true; //Set to true if inserted in any sub quad
         }
       }
@@ -117,10 +162,14 @@ function Quad(x, y, w, h, limit) {
       return success;
     }
   };
-
+  this.RemoveEntity = function (aEntityID) {
+    if (m_entities.has(aEntityID)) {
+      m_entities.delete(aEntityID);
+    }
+  };
   /**
    *
-   * @param {Array} foundObjects Array to store all found transform
+   * @param {Array} foundObjects Array to store all found QEntity
    * @param {number} rectX x-coordiante of the area(rectangle) to check
    * @param {number} rectY y-coordiante of the area to check
    * @param {number} w width of the area to check
@@ -140,20 +189,20 @@ function Quad(x, y, w, h, limit) {
         m_size.y
       )
     ) {
-      for (let i = 0; i < m_objects.length; i++) {
+      for (const [key, value] of m_entities) {
         if (
           CheckIntersection(
             rectX,
             rectY,
             w,
             h,
-            m_objects[i].position.x,
-            m_objects[i].position.y,
-            m_objects[i].scale.x,
-            m_objects[i].scale.y
+            value.position.x,
+            value.position.y,
+            value.scale.x,
+            value.scale.y
           )
         ) {
-          foundObjects.push(m_objects[i]);
+          foundObjects.push(value);
         }
       }
       if (m_childQuads && m_childQuads.length > 0) {
@@ -195,12 +244,6 @@ function Quad(x, y, w, h, limit) {
       rectA_X + rectA_W < rectB_X ||
       rectA_Y > rectB_Y + rectB_H ||
       rectA_Y + rectA_H < rectB_Y
-    );
-    return (
-      CheckIfPointInside({ x: rectX, y: rectY }) ||
-      CheckIfPointInside({ x: rectX, y: rectY + h }) ||
-      CheckIfPointInside({ x: rectX + w, y: rectY }) ||
-      CheckIfPointInside({ x: rectX + w, y: rectY + h })
     );
   }
 

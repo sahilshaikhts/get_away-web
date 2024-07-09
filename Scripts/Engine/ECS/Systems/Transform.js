@@ -9,7 +9,8 @@ export function Transform() {
   this.RegisterEntity = function (id) {
     if (this.components.hasOwnProperty(id)) {
       console.warn(
-        "Entity associated with this id already has the transform component or the id is duplicate!"
+        "Entity associated with this id already has the transform component or the id is duplicate!",
+        id
       );
     } else {
       const newComponent = new TransformComponent(id, {

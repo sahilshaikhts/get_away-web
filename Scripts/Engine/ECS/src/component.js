@@ -1,5 +1,8 @@
 //ECS_entity function-constructor/class
 export function ECS_component(ownerEntity) {
-  //Note:Do I need to store this? maybe remove it to minimize dependenices??
   this.ownerEntity = ownerEntity;
+  this.m_id = "UIDC" + Date.now() + Math.random(0, 1) * 100000;
+  this.GetID = function () {
+    return this.m_id;
+  };
 }
