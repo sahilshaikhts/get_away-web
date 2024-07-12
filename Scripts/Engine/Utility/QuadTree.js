@@ -1,3 +1,5 @@
+import { TransformComponent } from "../ECS/Systems/Components/transform-component.js";
+
 /**
  * @param {number} x X coordinate of QuadTree
  * @param {number} y Y coordinate of QuadTree
@@ -12,48 +14,79 @@ export default function QuadTree(x, y, w, h, limit = 4) {
 
   //Private
   const m_root = new Quad(x, y, w, h, limit);
-  //Associative array of array, index(quad) stores array of transforms?might need to change it
+  //Map of all the entities and the quads it's aquiring (transformID(key),Quad[](value))
+  const m_entities_quad = new Map();
+
+  //Map of all the enitities in the QuadTree(EntityID(key))
   const m_entities = new Map();
 
   //Public
   /**
-   * @param {QEntity} aEntity
+   * @param {TransformComponent} aTransform
    */
-  this.InsertEntity = function (aEntity) {
+  this.InsertObject = function (aTransform) {
     if (m_root) {
       //Array to store the quads that the entity was inserted in.
       const arr_quads = [];
-      const entityID = aEntity.GetID();
+      const entityID = aTransform.GetID();
 
-      //If inserted sucessfully add it to the m_entities
-      if (m_root.Insert(aEntity, arr_quads)) {
+      //If inserted sucessfully add it to the m_entities_quad
+      if (m_root.Insert(aTransform, arr_quads)) {
         //If entity already in the map
-        if (m_entities.has(entityID)) {
-          const quads = m_entities.get(entityID);
+        if (m_entities_quad.has(aTransform.GetID())) {
+          const quads = m_entities_quad.get(aTransform.GetID());
 
-          m_entities.set(entityID, [...quads, arr_quads]);
+          m_entities_quad.set(aTransform.GetID(), [...quads, arr_quads]);
         } else {
-          m_entities.set(entityID, arr_quads);
+          m_entities_quad.set(aTransform.GetID(), arr_quads);
         }
+        if (!m_entities.has(aTransform.GetID())) {
+          m_entities.set(aTransform.GetID(), aTransform);
+        }
+        return true;
+      } else {
+        console.warn("Failed inserting entity to QuadTree!");
+        return false;
       }
     } else {
       throw new Error("Fatal: Missing root quad!");
     }
   };
-  this.MigrateEntity = function (aEntityID) {
-    if (m_entities.has(aEntityID)) {
-      const quads = m_entities.get(aEntityID);
-      for (i = 0; i < quads.length; i++) {
-        quads.RemoveEntity(aEntityID);
+
+  /**
+   *
+   * @param {*} aTransformID UID of the enitity that was given when inserting object into QuadTree.
+   */
+  this.MigrateObject = function (aTransformID) {
+    if (
+      m_entities_quad.has(aTransformID) &&
+      m_entities_quad.has(aTransformID)
+    ) {
+      const quads = m_entities_quad.get(aTransformID);
+
+      for (let i = 0; i < quads.length; i++) {
+        quads[i].RemoveEntity(aTransformID);
       }
-      m_entities.delete(aEntityID);
+
+      m_entities_quad.delete(aTransformID);
+
+      //Reinsert entity ,if failed to insert for any reason remove from the m_entities map.
+      if (this.InsertObject(m_entities.get(aTransformID)) === false) {
+        m_entities.delete(aTransformID);
+      }
+    } else {
+      console.warn(
+        "Requested migration for the entity with given id doesn't exists in the QuadTree."
+      );
     }
   };
+
   /**
    * @param {number} rectX x-coordiante of the area(rectangle) to check
    * @param {number} rectY y-coordiante of the area to check
    * @param {number} w width of the area to check
    * @param {number} h heigth of the area to check
+   * @returns {Array} Returns array of found entities.
    */
   this.GetEntitiesWithinRange = function (rectX, rectY, w, h) {
     let foundObjects = [];
@@ -86,19 +119,6 @@ export default function QuadTree(x, y, w, h, limit = 4) {
     m_root.Draw(context);
   };
 }
-/**
- *
- * @param {*} aUID Object/Component's unique ID.
- * @param {*} aX Position in X-coordinate
- * @param {*} aY Position in Y-coordinate
- * @param {*} aW Width
- * @param {*} aH Height
- */
-export function QEntity(aUID, aX, aY, aW, aH) {
-  this.position = { x: aX ? aX : 0, y: aY ? aY : 0 };
-  this.scale = { x: aW ? aW : 1, y: aH ? aH : 1 };
-  this.GetID = () => aUID;
-}
 
 /**
  * Quad is class representing a branch in the quad tree.
@@ -118,29 +138,31 @@ function Quad(x, y, w, h, limit) {
   const m_entities = new Map();
   const m_childQuads = [];
 
+  this.GetObjects = () => m_entities;
+
   //Public
   //Note: Edge case to improve later: When subdivided the parents objects still remains scattered and often in a subquad and visibly looks it exceeds the limit(in sub-quad) ,redistribute the objects for more accurate and optimized version.
   /**
-   * @param {QEntity} aEntity Object of QEntity(QuadEntity) class
+   * @param {TransformComponent} aTransformID Object of TransformComponent class
    * @param {Array} aArrQuads Array to store quads that the entity was stored in.
    */
-  this.Insert = function (aEntity, aArrQuads) {
+  this.Insert = function (aTransform, aArrQuads) {
     //Add new object if not excceding limit,otherwise add it to a child-quad.
     if (m_entities.size < m_limit) {
       //If the shape intersect with the quad add it.
       if (
         CheckIntersection(
-          aEntity.position.x,
-          aEntity.position.y,
-          aEntity.scale.x,
-          aEntity.scale.y,
+          aTransform.position.x,
+          aTransform.position.y,
+          aTransform.scale.x,
+          aTransform.scale.y,
           m_position.x,
           m_position.y,
           m_size.x,
           m_size.y
         )
       ) {
-        m_entities.set(aEntity.GetID(), aEntity);
+        m_entities.set(aTransform.GetID(), aTransform);
         aArrQuads.push(this);
         return true;
       }
@@ -154,7 +176,7 @@ function Quad(x, y, w, h, limit) {
       let success = false;
       //Loop through each child quad and try insert
       for (let i = 0; i < m_childQuads.length; i++) {
-        if (m_childQuads[i].Insert(aEntity, aArrQuads)) {
+        if (m_childQuads[i].Insert(aTransform, aArrQuads)) {
           success = true; //Set to true if inserted in any sub quad
         }
       }
@@ -162,9 +184,10 @@ function Quad(x, y, w, h, limit) {
       return success;
     }
   };
-  this.RemoveEntity = function (aEntityID) {
-    if (m_entities.has(aEntityID)) {
-      m_entities.delete(aEntityID);
+
+  this.RemoveEntity = function (aTransformID) {
+    if (m_entities.has(aTransformID)) {
+      m_entities.delete(aTransformID);
     }
   };
   /**
@@ -287,14 +310,5 @@ function Quad(x, y, w, h, limit) {
     m_childQuads.push(subQuad_4);
 
     return true;
-  }
-
-  function CheckIfPointInside(position) {
-    return (
-      position.x > m_position.x &&
-      position.x < m_position.x + m_size.x &&
-      position.y > m_position.y &&
-      position.y < m_position.y + m_size.y
-    );
   }
 }

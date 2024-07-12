@@ -20,7 +20,7 @@ window.addEventListener("load", (event) => {
     ];
 
     //Level layout
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 5; i++) {
       squares.push(new ECS_entity(game));
       let transform = game.AddComponentToEntity(Transform, squares[i].GetID());
       transform.SetScale(50, 50);

@@ -3,7 +3,7 @@ import { Sprite } from "./ECS/Systems/Sprite.js";
 import { Transform } from "./ECS/Systems/Transform.js";
 import { ECS_component } from "./ECS/src/component.js";
 import { ECS_system } from "./ECS/src/system.js";
-import QuadTree, { QEntity } from "./Utility/QuadTree.js";
+import QuadTree from "./Utility/QuadTree.js";
 
 //Game function-constructor/class
 export function Game(canvas, bg_color) {
@@ -71,7 +71,40 @@ export function Game(canvas, bg_color) {
       );
     }
   });
+  canvas.addEventListener("click", (event) => {
+    const canvasBounds = canvas.getBoundingClientRect();
 
+    //get the scale of the canvas element
+    const scaleX = canvas.width / canvasBounds.width;
+    const scaleY = canvas.height / canvasBounds.height;
+
+    //Adjust the mouse position according to the scale
+    const mouseX = event.offsetX * scaleX;
+    const mouseY = event.offsetY * scaleY;
+
+    if (quadTree) {
+      let found = quadTree.GetEntitiesWithinRange(
+        mouseX - 2.5,
+        mouseY - 2.5,
+        5,
+        5
+      );
+      if (found && found.length > 0) {
+        const transformComponents = m_systems[0].GetAllComponents();
+
+        for (let key in transformComponents) {
+          if (transformComponents[key].GetID() === found[0].GetID()) {
+            transformComponents[key].position = {
+              x: transformComponents[key].position.x,
+              y: transformComponents[key].position.y + 50,
+            };
+          }
+        }
+        //Migrate
+        quadTree.MigrateObject(found[0].GetID());
+      }
+    }
+  });
   const DrawBackground = () => {
     m_draw_context.fillStyle = bg_color;
     m_draw_context.fillRect(0, 0, m_canvas.width, m_canvas.height);
@@ -89,15 +122,7 @@ export function Game(canvas, bg_color) {
   const SetUpQuadTree = function () {
     const transformComponents = m_systems[0].GetAllComponents();
     for (let key in transformComponents) {
-      quadTree.InsertEntity(
-        new QEntity(
-          transformComponents[key].GetID(),
-          transformComponents[key].position.x,
-          transformComponents[key].position.y,
-          transformComponents[key].scale.x,
-          transformComponents[key].scale.y
-        )
-      );
+      quadTree.InsertObject(transformComponents[key]);
     }
   };
 
